@@ -3,12 +3,14 @@ class User {
     private String password;
     private BST<Cryptocurrency> wallet;
     private Stack<Transaction> transactionHistory;
+    private CryptoPriceChecker priceChecker;
 
     public User(String username, String password) {
         this.username = username;
         this.password = password;
         this.wallet = new BST<>();
         this.transactionHistory = new Stack<>();
+        this.priceChecker = new CryptoPriceChecker();
     }
 
     public String getUsername() {
@@ -20,24 +22,48 @@ class User {
     }
 
     public void buyCryptocurrency(String symbol, double amount) {
-        Cryptocurrency crypto = wallet.search(new Cryptocurrency(symbol, 0));
+        double price = getPrice(symbol); 
+        if (price == -1) {
+            System.out.println("Failed to retrieve price information for " + symbol);
+            return;
+        }
+
+        Cryptocurrency crypto = wallet.search(new Cryptocurrency(symbol, 0, 0));
         if (crypto != null) {
             crypto.setAmount(crypto.getAmount() + amount);
         } else {
-            wallet.insert(new Cryptocurrency(symbol, amount));
+            wallet.insert(new Cryptocurrency(symbol, amount, price));
         }
-        transactionHistory.push(new Transaction("Buy", symbol, amount));
+        transactionHistory.push(new Transaction("Buy", symbol, amount, price));
     }
 
     public void sellCryptocurrency(String symbol, double amount) {
-        Cryptocurrency crypto = wallet.search(new Cryptocurrency(symbol, 0));
+        double price = getPrice(symbol);
+        if (price == -1) {
+            System.out.println("Failed to retrieve price information for " + symbol);
+            return;
+        }
+
+        Cryptocurrency crypto = wallet.search(new Cryptocurrency(symbol, 0, 0));
         if (crypto != null && crypto.getAmount() >= amount) {
             crypto.setAmount(crypto.getAmount() - amount);
-            transactionHistory.push(new Transaction("Sell", symbol, amount));
+            transactionHistory.push(new Transaction("Sell", symbol, amount, price));
         } else {
             System.out.println("Insufficient balance or cryptocurrency not found.");
         }
     }
+
+    private double getPrice(String symbol) {
+        String priceStr = priceChecker.getCurrentPrice(symbol);
+        try {
+            return Double.parseDouble(priceStr);
+        } catch (NumberFormatException e) {
+            System.out.println("Failed to parse price for " + symbol);
+            return -1;
+        }
+    }
+
+    
 
     public void displayWallet() {
         if (wallet.isEmpty()) {
