@@ -63,14 +63,23 @@ class User {
         }
     }
 
-    
-
     public void displayWallet() {
-        if (wallet.isEmpty()) {
+        if (wallet.getRoot() == null || wallet.isEmpty()) {
             System.out.println("Wallet is empty.");
         } else {
             System.out.println("Wallet contents:");
-            wallet.inorder(); // Display BST contents
+            displayNonZeroCrypto(wallet.getRoot());
+        }
+    }
+
+    private void displayNonZeroCrypto(BSTNode<Cryptocurrency> node) {
+        if (node != null) {
+            displayNonZeroCrypto(node.left);
+            Cryptocurrency crypto = node.data;
+            if (crypto.getAmount() > 0) {
+                System.out.println(crypto);
+            }
+            displayNonZeroCrypto(node.right);
         }
     }
 

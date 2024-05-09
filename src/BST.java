@@ -17,6 +17,10 @@ class BST<T extends Comparable<T>> {
         this.root = null;
     }
 
+    public BSTNode<T> getRoot() {
+        return root;
+    }
+
     public void insert(T data) {
         this.root = insertRec(this.root, data);
     }
