@@ -2,10 +2,11 @@ import java.util.Scanner;
 
 public class Main {
     private static Scanner scanner = new Scanner(System.in);
-    private static UserManager userManager = new UserManager();
+    private static UserManager userManager = new UserManager(scanner);
     private static CryptoPriceChecker priceChecker = new CryptoPriceChecker(); 
 
     public static void main(String[] args) {
+        userManager.loadUsers();
         boolean exit = false;
         while (!exit) {
             printMainMenu();
@@ -20,9 +21,10 @@ public class Main {
                     userManager.login();
                     break;
                 case 3:
-                    checkCryptoPrice();
+                     userManager.checkCryptoPrice(priceChecker);
                     break;
                 case 4:
+                    userManager.saveUsers();
                     exit = true;
                     break;
                 default:
@@ -40,11 +42,5 @@ public class Main {
         System.out.print("Choose an option: ");
     }
 
-    private static void checkCryptoPrice() {
-        System.out.print("\n\u001B[34mCheck Cryptocurrency Price\u001B[0m");
-        System.out.print("\nEnter cryptocurrency symbol: ");
-        String symbol = scanner.nextLine();
-        String price = priceChecker.getCurrentPrice(symbol);
-        System.out.println("The current price of " + symbol + " is " + price);
-    }
+    
 }

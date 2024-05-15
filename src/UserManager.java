@@ -2,9 +2,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.io.*;
+import java.lang.reflect.Type;
+
 public class UserManager {
-    private static Scanner scanner = new Scanner(System.in);
-    private static Map<String, User> users = new HashMap<>();
+    private Scanner scanner;
+    private Map<String, User> users = new HashMap<>();
+    private static final String USERS_FILE = "bin/users.json";
+    private Gson gson = new Gson();
+    public UserManager(Scanner scanner) {
+        this.scanner = scanner;
+    }
+
 
     public void register() {
         System.out.println("\n\u001B[34mRegistration\u001B[0m");
@@ -91,5 +103,37 @@ public class UserManager {
         user.sellCryptocurrency(symbol, amount);
         System.out.println("\u001B[32mTransaction completed.\u001B[0m");
     }
+
+    public void loadUsers() {
+        try (FileReader fileReader = new FileReader(USERS_FILE)) {
+            Type userMapType = new TypeToken<Map<String, User>>() {}.getType();
+            users = gson.fromJson(fileReader, userMapType);
+            if (users == null) {
+                users = new HashMap<>();
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("No users found. Starting fresh.");
+        } catch (IOException e) {
+            System.out.println("An error occurred while loading user data.");
+            e.printStackTrace();
+        }
+    }
+
+    public void saveUsers() {
+        try (FileWriter fileWriter = new FileWriter(USERS_FILE)) {
+            gson.toJson(users, fileWriter);
+        } catch (IOException e) {
+            System.out.println("An error occurred while saving user data.");
+            e.printStackTrace();
+        }
+    }
+    public void checkCryptoPrice(CryptoPriceChecker priceChecker) {
+        System.out.print("\n\u001B[34mCheck Cryptocurrency Price\u001B[0m");
+        System.out.print("\nEnter cryptocurrency symbol: ");
+        String symbol = scanner.nextLine();
+        String price = priceChecker.getCurrentPrice(symbol);
+        System.out.println("The current price of " + symbol + " is " + price);
+    }
+
 }
 
